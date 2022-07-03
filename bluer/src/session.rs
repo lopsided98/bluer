@@ -33,6 +33,7 @@ use tokio::{
 use crate::{
     adapter,
     adv::Advertisement,
+    adv_mon::RegisteredAdvertisementMonitor,
     agent::{Agent, AgentHandle, RegisteredAgent},
     all_dbus_objects, gatt, parent_path, Adapter, Error, ErrorKind, InternalErrorKind, Result, SERVICE_NAME,
 };
@@ -48,6 +49,7 @@ pub(crate) struct SessionInner {
     pub connection: Arc<SyncConnection>,
     pub crossroads: Mutex<Crossroads>,
     pub le_advertisment_token: IfaceToken<Advertisement>,
+    pub advertisement_monitor_token: IfaceToken<Arc<RegisteredAdvertisementMonitor>>,
     pub gatt_reg_service_token: IfaceToken<Arc<gatt::local::RegisteredService>>,
     pub gatt_reg_characteristic_token: IfaceToken<Arc<gatt::local::RegisteredCharacteristic>>,
     pub gatt_reg_characteristic_descriptor_token: IfaceToken<Arc<gatt::local::RegisteredDescriptor>>,
@@ -162,6 +164,7 @@ impl Session {
         )));
 
         let le_advertisment_token = Advertisement::register_interface(&mut crossroads);
+        let advertisement_monitor_token = RegisteredAdvertisementMonitor::register_interface(&mut crossroads);
         let gatt_service_token = gatt::local::RegisteredService::register_interface(&mut crossroads);
         let gatt_reg_characteristic_token =
             gatt::local::RegisteredCharacteristic::register_interface(&mut crossroads);
@@ -179,6 +182,7 @@ impl Session {
             connection: connection.clone(),
             crossroads: Mutex::new(crossroads),
             le_advertisment_token,
+            advertisement_monitor_token,
             gatt_reg_service_token: gatt_service_token,
             gatt_reg_characteristic_token,
             gatt_reg_characteristic_descriptor_token,

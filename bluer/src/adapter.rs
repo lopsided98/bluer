@@ -23,6 +23,7 @@ use uuid::Uuid;
 use crate::{
     adv,
     adv::{Advertisement, AdvertisementHandle, Capabilities, Feature, PlatformFeature, SecondaryChannel},
+    adv_mon::{AdvertisementMonitor, AdvertisementMonitorHandle, RegisteredAdvertisementMonitor},
     all_dbus_objects, device,
     device::Device,
     gatt, Address, AddressType, Error, ErrorKind, Event, InternalErrorKind, Modalias, Result, SessionInner,
@@ -297,6 +298,22 @@ impl Adapter {
         &self, gatt_profile: gatt::local::Profile,
     ) -> Result<gatt::local::ProfileHandle> {
         gatt_profile.register(self.inner.clone(), self.name.clone()).await
+    }
+
+    /// Registers an advertisement monitor to passively scan for devices.
+    ///
+    /// An advertisement monitor provides a stream of events when a device matching certain patterns
+    /// or conditions is found or lost. The caller will be notified based on data from targeted
+    /// advertisements even if a discovery session is not in progress.
+    ///
+    /// Drop the returned [AdvertisementMonitorHandle] to unregister the advertisement monitor.
+    pub async fn register_advertisement_monitor(
+        &self, monitor: AdvertisementMonitor,
+    ) -> Result<AdvertisementMonitorHandle> {
+        let (event_tx, event_rx) = tokio::sync::mpsc::channel(1);
+        let (release_tx, release_rx) = tokio::sync::oneshot::channel();
+        let reg_monitor = RegisteredAdvertisementMonitor::new(monitor, event_tx, release_tx);
+        reg_monitor.register(self.inner.clone(), self.name.clone(), event_rx, release_rx).await
     }
 
     // ===========================================================================================

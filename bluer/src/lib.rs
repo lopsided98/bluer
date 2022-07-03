@@ -512,6 +512,9 @@ mod adapter;
 pub mod adv;
 #[cfg(feature = "bluetoothd")]
 #[cfg_attr(docsrs, doc(cfg(feature = "bluetoothd")))]
+pub mod adv_mon;
+#[cfg(feature = "bluetoothd")]
+#[cfg_attr(docsrs, doc(cfg(feature = "bluetoothd")))]
 pub mod agent;
 #[cfg(feature = "bluetoothd")]
 mod device;

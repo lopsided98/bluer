@@ -119,3 +119,7 @@ required-features = ["bluetoothd"]
 [[example]]
 name = "list_adapters"
 required-features = ["bluetoothd"]
+
+[[example]]
+name = "apple_find_my_monitor"
+required-features = ["bluetoothd"]
